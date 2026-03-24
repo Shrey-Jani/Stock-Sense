@@ -9,6 +9,7 @@ from sklearn.model_selection import train_test_spilt
 from sklearn.metrics import accuracy_score, classification_report
 from sklearn.preprocessing import StandardScaler
 
+#Prepare data for training
 def prepare_data(df: pd.DataFram):
     feature_columns = ["MA20", "MA50", "RSI", "MACD", "MACD_Signal", "Volume_Change"]
 
@@ -27,6 +28,7 @@ def prepare_data(df: pd.DataFram):
 
     return X, Y
 
+# Train the Model
 def train_model(df: pd.DataFrame, ticker: str = "STOCK"):
     print(f"\n Starting XGBoost training for {ticker}")
 
@@ -70,3 +72,17 @@ def train_model(df: pd.DataFrame, ticker: str = "STOCK"):
     
     return model, scaler, accuracy
 
+# Save the Model
+
+def save_model(model, scaler, ticker: str):
+    save_folder = "backend/model/saved"
+    os.markedirs(save_folder, exist_ok = True)
+
+    model_path = f"{save_folder}/{ticker}_xgb_model.pkl"
+    scaler_path = f"{save_folder}/{ticker}_xgb_scaler.pkl"
+
+    joblib.dump(model, model_path)
+    joblib.dump(scaler, scaler_path)
+
+    print(f"\n Model Saved to: {model_path}")
+    print(f"Scaler saved to: {scaler_path}")
