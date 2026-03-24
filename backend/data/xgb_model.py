@@ -86,3 +86,19 @@ def save_model(model, scaler, ticker: str):
 
     print(f"\n Model Saved to: {model_path}")
     print(f"Scaler saved to: {scaler_path}")
+
+# Load a Saved Model
+
+def load_model(ticker: str):
+    save_folder = "backend/models/saved"
+    model_path = f"{save_folder}/{ticker}_xgb_model.pkl"
+    scaler_path = f"{save_folder}/{ticker}_xgb_scaler.pkl"
+
+    if not os.path.exists(model_path):
+        raise FileNotFoundError(f"No saved model found for {ticker}")
+    
+    model = joblib.load(model_path)
+    scaler = joblib.load(scaler_path)
+
+    print(f"Loaded saved model for {ticker}")
+    return model, scaler
