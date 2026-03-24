@@ -5,26 +5,28 @@ import os
 
 from xgboost import XGBClassifier
 
-from sklearn.model_selection import train_test_spilt
+from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, classification_report
 from sklearn.preprocessing import StandardScaler
 
 #Prepare data for training
-def prepare_data(df: pd.DataFram):
+def prepare_data(df: pd.DataFrame):
     feature_columns = ["MA20", "MA50", "RSI", "MACD", "MACD_Signal", "Volume_Change"]
 
-    df["Tomorrow_Close"] = df['Close'].shift(-1)
+    close = df["Close"].squeeze()
 
-    df["Label"] = (df["Tomorrow_Close"] > df["Close"]).astype(int)
+    df["Tomorrow_Close"] = close.shift(-1)
 
+    df["Label"] = (df["Tomorrow_Close"].squeeze() > close).astype(int)
+    
     df = df.dropna()
 
     X = df[feature_columns]
     Y = df["Label"]
 
     print(f"Total rows available for training: {len(df)}")
-    print(f"Days price went Up:  {y.sum()} ({round(y.mean()*100, 1)}%)")
-    print(f"Days Price went Down: {(y==0).sum()} ({round((1-y.mean())*100, 1)}%)")
+    print(f"Days price went Up:  {Y.sum()} ({round(Y.mean()*100, 1)}%)")
+    print(f"Days Price went Down: {(Y==0).sum()} ({round((1-Y.mean())*100, 1)}%)")
 
     return X, Y
 
@@ -75,11 +77,13 @@ def train_model(df: pd.DataFrame, ticker: str = "STOCK"):
 # Save the Model
 
 def save_model(model, scaler, ticker: str):
-    save_folder = "backend/model/saved"
-    os.markedirs(save_folder, exist_ok = True)
+    
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    save_folder = os.path.join(base_dir, "saved")
+    os.makedirs(save_folder, exist_ok = True)
 
-    model_path = f"{save_folder}/{ticker}_xgb_model.pkl"
-    scaler_path = f"{save_folder}/{ticker}_xgb_scaler.pkl"
+    model_path = os.path.join(save_folder, f"{ticker}_xgb_model.pkl")
+    scaler_path = os.path.join(save_folder, f"{ticker}_xgb_scaler.pkl")
 
     joblib.dump(model, model_path)
     joblib.dump(scaler, scaler_path)
@@ -90,9 +94,11 @@ def save_model(model, scaler, ticker: str):
 # Load a Saved Model
 
 def load_model(ticker: str):
-    save_folder = "backend/models/saved"
-    model_path = f"{save_folder}/{ticker}_xgb_model.pkl"
-    scaler_path = f"{save_folder}/{ticker}_xgb_scaler.pkl"
+    
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    save_folder = os.path.join(base_dir, "saved")
+    model_path = os.path.join(save_folder, f"{ticker}_xgb_model.pkl")
+    scaler_path = os.path.join(save_folder, f"{ticker}_xgb_scaler.pkl")
 
     if not os.path.exists(model_path):
         raise FileNotFoundError(f"No saved model found for {ticker}")
@@ -102,3 +108,51 @@ def load_model(ticker: str):
 
     print(f"Loaded saved model for {ticker}")
     return model, scaler
+
+# Make a Prediction
+def predict_next_day(df: pd.DataFrame, ticker: str):
+    model, scaler = load_model(ticker)
+
+    feature_columns = ["MA20", "MA50", "RSI", "MACD", "MACD_Signal", "Volume_Change"]
+    latest_data = df[feature_columns].tail(1)
+
+    latest_scaled = scaler.transform(latest_data)
+
+    prediction = model.predict(latest_scaled)[0]
+
+    confidence = model.predict_proba(latest_scaled)[0][prediction]
+
+    direction = "UP" if prediction == 1 else "DOWN"
+
+    print(f"\n Prediction for {ticker} tomorrow:")
+    print(f" Direction {direction}")
+    print(f" Confidence: {round(confidence * 100, 1)}%")
+
+    return {
+        "ticker": ticker,
+        "direction": direction,
+        "confidence": round(confidence * 100, 1),
+        "prediction": prediction
+    }
+
+if __name__ == "__main__":
+    import sys
+    sys.path.append("backend/data")
+
+    from fetcher import fetch_stock_data
+    from features import add_indicators
+    from cache import get_stock_data
+
+    ticker = "AAPL"
+
+    print(f"Training XGBoost model for {ticker}")
+
+    df = get_stock_data(ticker)
+    model, scaler, accuracy = train_model(df, ticker)
+    save_model(model, scaler, ticker)
+
+    result = predict_next_day(df, ticker)
+
+    print(f"Final Result")
+    print(f"{ticker} is predicted to go {result['direction']} tomorrow")
+    print(f"Confidence: {result['confidence']}%")
