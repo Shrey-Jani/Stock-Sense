@@ -126,4 +126,18 @@ def save_model(model, scaler, ticker: str):
     print(f"\n LSTM model saved to: {model_path}")
     print(f" Scaler saved to: {scaler_path}")
 
-    
+#Load Saved Model
+def load_lstm_model(ticker: str):
+    base_dir =  os.path.dirname(os.path.abspath(__file__))
+    save_folder = os.path.join(base_dir, "saved")
+
+    model_path = os.path.join(save_folder, f"{ticker}_lstm_model.h5")
+    scaler_path = os.path.join(save_folder, f"{ticker}_lstm_scaler.pkl")
+
+    if not os.path.exists(model_path):
+        raise FileNotFoundError(f"No LSTM Model found for {ticker}.")
+    model = load_model(model_path)
+    scaler = joblib.load(scaler_path)
+
+    print(f"Loaded LSTM Model for {ticker}")
+    return model, scaler
