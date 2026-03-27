@@ -97,8 +97,8 @@ def load_model(ticker: str):
     
     base_dir = os.path.dirname(os.path.abspath(__file__))
     save_folder = os.path.join(base_dir, "saved")
-    model_path = os.path.join(save_folder, f"{ticker}_xgb_model.pkl")
-    scaler_path = os.path.join(save_folder, f"{ticker}_xgb_scaler.pkl")
+    model_path = f"{save_folder}/{ticker}_xgb_model.pkl"
+    scaler_path = f"{save_folder}/{ticker}_xgb_scaler.pkl"
 
     if not os.path.exists(model_path):
         raise FileNotFoundError(f"No saved model found for {ticker}")
