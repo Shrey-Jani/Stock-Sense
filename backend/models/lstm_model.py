@@ -110,3 +110,20 @@ def train_model(df: pd.DataFrame, ticker: str = "STOCK"):
 
     return model, scaler, rmse
 
+# Save The Model
+def save_model(model, scaler, ticker: str):
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    save_folder = os.path.join(base_dir, "saved")
+    os.makedirs(save_folder, exist_ok = True)
+
+    #save to keras model in .h5 format
+    model_path = os.path.join(save_folder, f"{ticker}_lstm_model.h5")
+    scaler_path = os.path.join(save_folder, f"{ticker}_lstm_scaler.pkl")
+
+    model.save(model_path)
+    joblib.dump(scaler, scaler_path)
+
+    print(f"\n LSTM model saved to: {model_path}")
+    print(f" Scaler saved to: {scaler_path}")
+
+    
