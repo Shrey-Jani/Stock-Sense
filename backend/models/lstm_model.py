@@ -141,3 +141,51 @@ def load_lstm_model(ticker: str):
 
     print(f"Loaded LSTM Model for {ticker}")
     return model, scaler
+
+# Predict next 30 days
+
+def predict_next_30_days(df: pd.DataFrame, ticker: str):
+
+    model, scaler = load_lstm_model(ticker)
+
+    close_prices = df["Close"].squeeze().values
+    last_60_scaled = scaler.transform(last_60_scaled.reshape(-1,1))
+
+    #this list will grow as we predict day by day
+    current_window = list(last_60_scaled.flatten())
+
+    #Store all 30 future predictions here
+    future_predictions = []
+
+    #DSA in charge for forecasting next 30 days
+    for day in range(FORECAST_DAYS):
+
+        #Take the last 60 values from our current window
+        input_sequence = np.array(current_window[-SEQUENCE_LENGTH:])
+
+        input_sequence = input_sequence.reshape(1, SEQUENCE_LENGTH, 1)
+
+        next_day_scaled = model.predict(input_sequence, verbose=0)[0][0]
+
+        current_window.append(next_day_scaled)
+
+        future_predictions.append(next_day_scaled) 
+
+        future_predictions = np.array(future_predictions).reshape(-1,1)
+        future_prices_real = scaler.inverse_transform(future_predictions)
+
+        #Flatten to a simple list of prices
+        future_prices_list = future_prices_real.flatten().tolist()
+
+        print(f"\n 30 day price forecast for {ticker}:")
+        for i, price in enumerate(future_prices_list[:5], 1):
+            print(f"Day {i}: ${round(price, 2)}")
+        print(f" ...")
+
+        return {
+            "ticker": ticker,
+            "forecast_days": FORECAST_DAYS,
+            "prices": [round(p, 2) for p in future_prices_list]
+        }
+    
+    
