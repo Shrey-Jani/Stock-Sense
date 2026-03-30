@@ -18,7 +18,7 @@ from fastapi.middleware.cors import CORSMiddleware
 # predict module has stock prediction endpoints
 # movers module has stock movers data (trending stocks)
 # history module has historical data endpoints
-from api.routes import predict, movers, history
+from api.routes import predict, movers, history, charts
 
 # Create the FastAPI application instance with metadata
 app = FastAPI(
@@ -63,6 +63,8 @@ app.include_router(movers.router, prefix="/movers", tags = ["Movers"])
 # prefix="/history" means all endpoints will start with /history
 # tags=["History"] categorizes these endpoints in documentation
 app.include_router(history.router, prefix="/history", tags = ["History"])
+
+app.include_router(charts.router, prefix="/charts", tags=["charts"])
 
 # Define the root endpoint (GET request to /)
 # This is the first endpoint users visit to check if API is working

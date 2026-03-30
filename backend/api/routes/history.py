@@ -5,6 +5,7 @@ import bisect
 import sys
 # Import os module for operating system interactions and file path operations
 import os
+import pandas as pd
 
 # Add backend directory to Python path so we can import modules from there
 # __file__ = current file path (history.py)
@@ -96,14 +97,27 @@ def get_historical_data(ticker: str, from_date: str = None):
         # Print how much data we're returning
         print(f"returning {len(dates)} data points for {ticker}")
 
-        # Return the historical data as JSON response
+        # Get MA20, MA50, RSI values for the chart
+        ma20    = df_filtered["MA20"].squeeze()
+        ma50    = df_filtered["MA50"].squeeze()
+        rsi     = df_filtered["RSI"].squeeze()
+
+        ma20_values = [round(float(v), 2) if not pd.isna(v) else None for v in ma20.tolist()]
+        ma50_values = [round(float(v), 2) if not pd.isna(v) else None for v in ma50.tolist()]
+        rsi_values  = [round(float(v), 2) if not pd.isna(v) else None for v in rsi.tolist()]
+
+        print(f" Returning {len(dates)} data points for {ticker}")
+
         return {
-            "ticker": ticker,        # Stock symbol (e.g., "AAPL")
-            "Dates": dates,          # List of dates in YYYY-MM-DD format
-            "prices": prices,        # List of closing prices for each date
-            "volumes": volumes,      # List of trading volumes for each date
-            "count": len(dates),     # Total number of data points returned
-            "status": "success"      # Indicates request was successful
+            "ticker":  ticker,
+            "dates":   dates,
+            "prices":  prices,
+            "volumes": volumes,
+            "ma20":    ma20_values,
+            "ma50":    ma50_values,
+            "rsi":     rsi_values,
+            "count":   len(dates),
+            "status":  "success"
         }
     
     # Handle HTTPException specifically (from validation above)
