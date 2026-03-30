@@ -105,7 +105,7 @@ def get_top_movers():
             {
                 "ticker": ticker,        # Stock symbol (e.g., "AAPL")
                 "price": price,          # Current price
-                "change_percent": percent,  # Percentage change
+                "change_percent": pct,  # Percentage change
                 "type": "gainer"         # Label as a gainer
             }
             # Loop through each top gainer tuple and convert it
@@ -117,7 +117,7 @@ def get_top_movers():
             {
                 "ticker": ticker,        # Stock symbol (e.g., "TSLA")
                 "price": price,          # Current price
-                "change_percent": percent,  # Percentage change (negative number)
+                "change_percent": pct,  # Percentage change (negative number)
                 "type": "loser"          # Label as a loser
             }
             # Loop through each top loser tuple and convert it

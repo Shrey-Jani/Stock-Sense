@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { fetchPrediction } from "../services/api";
 
-function searchBar({ onDataFetched, onError, setLoading }) {
+function SearchBar({ onDataFetched, onError, setLoading }) {
   const [ticker, setTicker] = useState("");
 
   const handleSearch = async () => {
@@ -70,4 +70,4 @@ function searchBar({ onDataFetched, onError, setLoading }) {
   );
 }
 
-export default searchBar;
+export default SearchBar;

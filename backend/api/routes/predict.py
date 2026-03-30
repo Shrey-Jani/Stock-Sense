@@ -35,7 +35,7 @@ from models.lstm_model import train_model as train_lstm
 # Import LSTM model saving function
 from models.lstm_model import save_model as save_lstm
 # Import LSTM prediction function for next 30 days forecast
-from models.lstm_model import predict_next_30_day
+from models.lstm_model import predict_next_30_days
 
 # Create a router instance to group prediction-related endpoints
 # This will be registered in main.py with prefix "/predict"
@@ -99,7 +99,7 @@ def predict_stock(ticker: str):
         # Print status message
         print(f"Running LSTM 30 days prediction")
         # Make prediction using LSTM model (next 30 days prices)
-        lstm_result = predict_next_30_day(df, ticker)
+        lstm_result = predict_next_30_days(df, ticker)
 
         # Get the most recent closing price (today's price)
         # df["Close"].squeeze() converts to Series, iloc[-1] gets last row
@@ -113,14 +113,14 @@ def predict_stock(ticker: str):
 
         # Return the prediction results as JSON response
         return {
-            "ticker": ticker,  # Stock symbol (e.g., "AAPL")
-            "current_price": current_price,  # Today's closing price
-            "price_change": price_change,  # Dollar change from yesterday
-            "price_change_percent": price_change_percent,  # Percentage change from yesterday
-            "direction": xgb_result["direction"],  # XGBoost prediction: up or down for next day
-            "confidence": xgb_result["confidence"],  # XGBoost confidence level
-            "forecast": lstm_result["prices"],  # LSTM 30-day price forecast
-            "status": "success"  # Indicates request was successful
+            "ticker":            ticker,
+            "current_price":     float(round(float(df["Close"].squeeze().iloc[-1]), 2)),
+            "price_change":      float(round(float(df["Close"].squeeze().iloc[-1]) - float(df["Close"].squeeze().iloc[-2]), 2)),
+            "price_change_pct":  float(round(((float(df["Close"].squeeze().iloc[-1]) - float(df["Close"].squeeze().iloc[-2])) / float(df["Close"].squeeze().iloc[-2])) * 100, 2)),
+            "direction":         str(xgb_result["direction"]),
+            "confidence":        float(xgb_result["confidence"]),
+            "forecast":          [float(p) for p in lstm_result["prices"]],
+            "status":            "success"
         }
     # Catch any exceptions that occur during prediction
     except Exception as e:
