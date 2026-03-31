@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const BASE_URL = "http://localhost:8000";
+// Use environment variable for deployed backend, fallback to localhost for development
+const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
 export const fetchPrediction = async (ticker) => {
   const response = await axios.get(`${BASE_URL}/predict`, {
