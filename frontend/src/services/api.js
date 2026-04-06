@@ -9,14 +9,14 @@ const BASE_URL =
     : "http://localhost:8000");
 
 export const fetchPrediction = async (ticker) => {
-  const response = await axios.get(`${BASE_URL}/predict`, {
+  const response = await axios.get(`${BASE_URL}/predict/`, {
     params: { ticker },
   });
   return response.data;
 };
 
 export const fetchMovers = async () => {
-  const response = await axios.get(`${BASE_URL}/movers`);
+  const response = await axios.get(`${BASE_URL}/movers/`);
   return response.data;
 };
 
@@ -28,6 +28,6 @@ export const fetchHistory = async (ticker, fromDate = null) => {
     params.from_date = fromDate;
   }
 
-  const response = await axios.get(`${BASE_URL}/history`, { params });
+  const response = await axios.get(`${BASE_URL}/history/`, { params });
   return response.data;
 };

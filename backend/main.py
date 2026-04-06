@@ -32,11 +32,12 @@ app = FastAPI(
 
 # Add CORS (Cross-Origin Resource Sharing) middleware to the application
 # This allows the frontend (running on different origin/port) to make requests to this backend
-# Build allowed origins list - include localhost for development and production URLs
+# Build allowed origins list - include localhost for development and deployed frontend URLs
+frontend_origin = os.getenv("FRONTEND_ORIGIN", "https://frontend-00g7.onrender.com")
 allowed_origins = [
     "http://localhost:3000",      # Development: React dev server
     "http://127.0.0.1:3000",      # Development: Alternative localhost
-    "https://*.vercel.app",        # Production: Any Vercel deployment
+    frontend_origin,                # Render frontend (or custom domain via env var)
 ]
 
 app.add_middleware(
@@ -50,7 +51,9 @@ app.add_middleware(
     # Allow all HTTP methods: GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD, TRACE
     allow_methods = ["*"],
     # Allow all HTTP headers in requests (Content-Type, Authorization, etc.)
-    allow_headers = ["*"]
+    allow_headers = ["*"],
+    # Allow Vercel preview domains without listing each one manually
+    allow_origin_regex=r"https://.*\.vercel\.app"
 )
 
 # Register route modules with the FastAPI app
