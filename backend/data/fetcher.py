@@ -1,27 +1,6 @@
 import yfinance as yf
 import pandas as pd
-import requests
 from datetime import datetime
-
-def _create_session():
-    """Create a requests session with browser-like headers.
-    
-    Yahoo Finance blocks requests from cloud server IPs (Render, Heroku, etc.)
-    that look like bot traffic. Using a browser User-Agent and standard headers
-    makes the requests appear legitimate.
-    """
-    session = requests.Session()
-    session.headers.update({
-        "User-Agent": (
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/131.0.0.0 Safari/537.36"
-        ),
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.5",
-        "Accept-Encoding": "gzip, deflate, br",
-    })
-    return session
 
 def fetch_stock_data(ticker: str, period: str = "5y") -> pd.DataFrame:
     """Fetch stock data with intelligent retry logic for insufficient data.
@@ -38,10 +17,8 @@ def fetch_stock_data(ticker: str, period: str = "5y") -> pd.DataFrame:
     """
     print(f"Fetching data for {ticker} (period: {period})...")
     
-    session = _create_session()
-    
     try:
-        stock = yf.download(ticker, period=period, auto_adjust=True, progress=False, session=session)
+        stock = yf.download(ticker, period=period, auto_adjust=True, progress=False)
     except Exception as e:
         print(f"Error downloading {ticker}: {str(e)}")
         raise ValueError(f"Failed to fetch data for ticker: {ticker}. Error: {str(e)}")
@@ -60,7 +37,7 @@ def fetch_stock_data(ticker: str, period: str = "5y") -> pd.DataFrame:
     if len(stock) < 100:
         print(f"⚠️  Only got {len(stock)} rows with {period} period. Retrying with max period...")
         try:
-            stock = yf.download(ticker, period="max", auto_adjust=True, progress=False, session=session)
+            stock = yf.download(ticker, period="max", auto_adjust=True, progress=False)
             if not stock.empty:
                 stock = stock[["Open", "High", "Low", "Close", "Volume"]]
                 stock.dropna(inplace=True)

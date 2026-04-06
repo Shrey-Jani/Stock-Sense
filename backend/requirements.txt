@@ -10,3 +10,5 @@ yfinance==0.2.66
 python-dotenv==1.0.0
 pydantic==2.5.2
 matplotlib==3.8.4
+curl_cffi>=0.5.7
+
