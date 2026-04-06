@@ -41,8 +41,30 @@ def get_stock_data(ticker):
     
     print(f"No cache found for {ticker}. Downloading from Yahoo Finance...")
     
-    fresh_data = fetch_stock_data(ticker)
+    try:
+        fresh_data = fetch_stock_data(ticker)
+    except ValueError as e:
+        print(f"Data fetch error: {str(e)}")
+        raise
+    
+    # Validate minimum data before processing (fetch_stock_data already does this with retry)
+    if fresh_data.empty or len(fresh_data) < 100:
+        raise ValueError(
+            f"Insufficient data for {ticker}. Got {len(fresh_data)} rows after fetch. "
+            f"Need at least 100 rows. Try a different ticker or check the stock exchange."
+        )
+    
+    print(f"Adding technical indicators to {len(fresh_data)} rows...")
     fresh_data = add_indicators(fresh_data)
+    
+    # Validate data after adding indicators (after dropna)
+    if fresh_data.empty or len(fresh_data) < 61:
+        raise ValueError(
+            f"Not enough data after preprocessing for {ticker}. Got {len(fresh_data)} rows, need at least 61.\n"
+            f"This happens when technical indicators (MA20, MA50, RSI, MACD) remove too many rows."
+        )
+    
+    print(f"✓ Successfully processed {len(fresh_data)} rows for {ticker}")
     save_to_cache(ticker, fresh_data)
     return fresh_data
 

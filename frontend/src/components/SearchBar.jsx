@@ -14,13 +14,82 @@ const SUGGESTIONS = [
   "NFLX",
 ];
 
+// Mapping of company names to ticker symbols
+const COMPANY_TO_TICKER = {
+  apple: "AAPL",
+  tesla: "TSLA",
+  google: "GOOGL",
+  alphabet: "GOOGL",
+  microsoft: "MSFT",
+  amazon: "AMZN",
+  nvidia: "NVDA",
+  meta: "META",
+  facebook: "META",
+  netflix: "NFLX",
+  nvidia: "NVDA",
+  amd: "AMD",
+  intel: "INTC",
+  ibm: "IBM",
+  oracle: "ORCL",
+  salesforce: "CRM",
+  adobe: "ADBE",
+  stripe: "STRP",
+  paypal: "PYPL",
+  square: "SQ",
+  uber: "UBER",
+  lyft: "LYFT",
+  airbnb: "ABNB",
+  zoom: "ZM",
+  slack: "WORK",
+  gitlab: "GTLB",
+  snapchat: "SNAP",
+  pinterest: "PINS",
+  twitter: "TWTR",
+  x: "TWTR",
+  tiktok: "MODG",
+  discord: "DCRD",
+  roblox: "RBLX",
+
+  // Add all ticker symbols as-is for convenience
+  aapl: "AAPL",
+  tsla: "TSLA",
+  googl: "GOOGL",
+  msft: "MSFT",
+  amzn: "AMZN",
+  nvda: "NVDA",
+  meta: "META",
+  nflx: "NFLX",
+};
+
 function SearchBar({ onDataFetched, onError, setLoading }) {
   const [ticker, setTicker] = useState("");
   const [focused, setFocused] = useState(false);
 
+  // Convert company name to ticker symbol
+  const nameToTicker = (input) => {
+    const uppercase = input.toUpperCase();
+    const lowercase = input.toLowerCase();
+
+    // Check if it's already a ticker symbol (all caps, 1-4 letters)
+    if (/^[A-Z]{1,5}$/.test(uppercase)) {
+      return uppercase;
+    }
+
+    // Check if it's a company name
+    if (COMPANY_TO_TICKER[lowercase]) {
+      return COMPANY_TO_TICKER[lowercase];
+    }
+
+    // If not found, return uppercased input as fallback
+    return uppercase;
+  };
+
   const handleSearch = async (val) => {
-    const t = (val || ticker).trim().toUpperCase();
-    if (!t) return;
+    const input = (val || ticker).trim();
+    if (!input) return;
+
+    const t = nameToTicker(input);
+
     try {
       setLoading(true);
       setFocused(false);
@@ -28,7 +97,7 @@ function SearchBar({ onDataFetched, onError, setLoading }) {
       onDataFetched(data);
     } catch (e) {
       onError(
-        `Could not fetch data for "${t}". Please check the ticker symbol.`,
+        `Could not fetch data for "${input}". Please check the company name or ticker symbol.`,
       );
     } finally {
       setLoading(false);
@@ -85,11 +154,11 @@ function SearchBar({ onDataFetched, onError, setLoading }) {
         <input
           type="text"
           value={ticker}
-          onChange={(e) => setTicker(e.target.value.toUpperCase())}
+          onChange={(e) => setTicker(e.target.value)}
           onKeyPress={handleKey}
           onFocus={() => setFocused(true)}
           onBlur={() => setTimeout(() => setFocused(false), 150)}
-          placeholder="Enter ticker symbol — AAPL, TSLA, GOOGL..."
+          placeholder="Search by name or ticker — Apple, Tesla, Google..."
           style={{
             flex: 1,
             border: "none",
@@ -153,12 +222,21 @@ function SearchBar({ onDataFetched, onError, setLoading }) {
         >
           Try:
         </span>
-        {SUGGESTIONS.map((s) => (
+        {[
+          "Apple",
+          "Tesla",
+          "Google",
+          "Microsoft",
+          "Amazon",
+          "Nvidia",
+          "Meta",
+          "Netflix",
+        ].map((company) => (
           <button
-            key={s}
+            key={company}
             onClick={() => {
-              setTicker(s);
-              handleSearch(s);
+              setTicker(company);
+              handleSearch(company);
             }}
             style={{
               background: "#F8F7F4",
@@ -183,7 +261,7 @@ function SearchBar({ onDataFetched, onError, setLoading }) {
               e.target.style.borderColor = "rgba(0,0,0,0.08)";
             }}
           >
-            {s}
+            {company}
           </button>
         ))}
       </div>

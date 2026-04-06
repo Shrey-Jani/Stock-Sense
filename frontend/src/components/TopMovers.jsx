@@ -3,10 +3,11 @@
 import React, { useEffect, useState } from "react";
 import { fetchMovers } from "../services/api";
 
-function TopMovers() {
+function TopMovers({ onTickerClick }) {
   const [movers, setMovers] = useState(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("gainers"); // "gainers" or "losers"
+  const [hoveredTicker, setHoveredTicker] = useState(null);
 
   useEffect(() => {
     fetchMovers()
@@ -20,9 +21,13 @@ function TopMovers() {
     const color = isUp ? "#10B981" : "#EF4444";
     const bgColor = isUp ? "#F0FDF4" : "#FFF5F5";
     const border = isUp ? "#BBF7D0" : "#FED7D7";
+    const isHovered = hoveredTicker === stock.ticker;
 
     return (
       <div
+        onClick={() => onTickerClick && onTickerClick(stock.ticker)}
+        onMouseEnter={() => setHoveredTicker(stock.ticker)}
+        onMouseLeave={() => setHoveredTicker(null)}
         style={{
           display: "flex",
           alignItems: "center",
@@ -30,6 +35,14 @@ function TopMovers() {
           padding: "10px 0",
           borderBottom: index < 4 ? "1px solid rgba(0,0,0,0.05)" : "none",
           animation: `fadeUp 0.3s ${index * 0.05}s ease both`,
+          cursor: "pointer",
+          borderRadius: 8,
+          paddingLeft: 8,
+          paddingRight: 8,
+          backgroundColor: isHovered
+            ? "rgba(99, 102, 241, 0.05)"
+            : "transparent",
+          transition: "all 0.15s ease",
         }}
       >
         {/* Rank + ticker */}

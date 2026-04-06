@@ -31,6 +31,10 @@ BATCH_SIZE = 32
 def prepare_sequences(df: pd.DataFrame):
     # Extract closing prices from dataframe and convert to 1D array
     close_prices = df["Close"].squeeze().values
+    
+    # Validate we have enough data for LSTM training
+    if len(close_prices) < SEQUENCE_LENGTH + 1:
+        raise ValueError(f"Insufficient data: need at least {SEQUENCE_LENGTH + 1} prices, got {len(close_prices)}. Make sure you have at least 61 rows after preprocessing.")
 
     # Reshape prices from 1D to 2D array (required by scaler)
     close_prices = close_prices.reshape(-1, 1)
@@ -230,6 +234,11 @@ def predict_next_30_days(df: pd.DataFrame, ticker: str):
 
     # Extract all closing prices from dataframe
     close_prices = df["Close"].squeeze().values
+    
+    # Validate sufficient closing prices exist
+    if len(close_prices) < SEQUENCE_LENGTH:
+        raise ValueError(f"Insufficient price data for {ticker}. Need {SEQUENCE_LENGTH} prices, got {len(close_prices)}")
+    
     # Get the most recent 60 prices (used as starting input)
     last_60_prices = close_prices[-SEQUENCE_LENGTH:]
     # Normalize the last 60 prices using the saved scaler

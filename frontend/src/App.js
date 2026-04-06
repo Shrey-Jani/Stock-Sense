@@ -69,6 +69,23 @@ function App() {
     setStockData(null);
   };
 
+  const handleTickerClick = async (ticker) => {
+    try {
+      setLoading(true);
+      const { fetchPrediction } = await import("./services/api");
+      const data = await fetchPrediction(ticker);
+      handleDataFetched(data);
+      // Scroll to top to show results
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (e) {
+      handleError(
+        `Could not fetch data for "${ticker}". Please check the ticker symbol.`,
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <>
       <style>{globalStyles}</style>
@@ -169,6 +186,17 @@ function App() {
             onError={handleError}
             setLoading={setLoading}
           />
+          <p
+            style={{
+              fontSize: 12,
+              color: "#94A3B8",
+              marginTop: 12,
+              textAlign: "center",
+            }}
+          >
+            💡 Tip: You can also click on any stock ticker in the{" "}
+            <strong>Top Movers</strong> section to see its prediction
+          </p>
         </div>
 
         {/* ── LOADING ────────────────────────────────────── */}
@@ -259,7 +287,7 @@ function App() {
                 <PredictionCard data={stockData} />
               </div>
               <div className="fade-up-2">
-                <TopMovers />
+                <TopMovers onTickerClick={handleTickerClick} />
               </div>
             </div>
 
