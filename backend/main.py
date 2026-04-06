@@ -10,9 +10,11 @@ import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # Import FastAPI class to create the web API application
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 # Import CORSMiddleware to handle Cross-Origin Resource Sharing (allows frontend to communicate with backend)
 from fastapi.middleware.cors import CORSMiddleware
+# Import JSONResponse for custom error responses with CORS headers
+from fastapi.responses import JSONResponse
 
 # Import route modules that contain API endpoint logic
 # predict module has stock prediction endpoints
@@ -55,6 +57,45 @@ app.add_middleware(
     # Allow Vercel preview domains without listing each one manually
     allow_origin_regex=r"https://.*\.vercel\.app"
 )
+
+
+# --- Custom exception handlers to ensure CORS headers are always present ---
+# When FastAPI raises an HTTPException (e.g. 500), the CORS middleware may not
+# attach Access-Control-Allow-Origin to the error response, causing the browser
+# to block it entirely. These handlers manually add the header so the frontend
+# can read the error message instead of seeing a generic CORS error.
+
+@app.exception_handler(HTTPException)
+async def cors_http_exception_handler(request: Request, exc: HTTPException):
+    """Handle HTTPException and ensure CORS headers are included."""
+    origin = request.headers.get("origin", "")
+    headers = {}
+    # Only add the CORS header if the origin is in our allowed list
+    if origin in allowed_origins or origin.endswith(".vercel.app"):
+        headers["Access-Control-Allow-Origin"] = origin
+        headers["Access-Control-Allow-Credentials"] = "true"
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+        headers=headers,
+    )
+
+
+@app.exception_handler(Exception)
+async def cors_general_exception_handler(request: Request, exc: Exception):
+    """Catch-all handler for unhandled exceptions – ensures CORS headers are present."""
+    origin = request.headers.get("origin", "")
+    headers = {}
+    if origin in allowed_origins or origin.endswith(".vercel.app"):
+        headers["Access-Control-Allow-Origin"] = origin
+        headers["Access-Control-Allow-Credentials"] = "true"
+    print(f"Unhandled error: {exc}")
+    return JSONResponse(
+        status_code=500,
+        content={"detail": f"Internal server error: {str(exc)}"},
+        headers=headers,
+    )
+
 
 # Register route modules with the FastAPI app
 # Router is like a group of related API endpoints
