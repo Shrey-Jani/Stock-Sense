@@ -10,7 +10,7 @@ import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # Import FastAPI class to create the web API application
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 # Import CORSMiddleware to handle Cross-Origin Resource Sharing (allows frontend to communicate with backend)
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -77,13 +77,14 @@ app.include_router(charts.router, prefix="/charts", tags=["charts"])
 # This is the first endpoint users visit to check if API is working
 @app.get("/")
 # Function that handles GET requests to the root path
-def root():
+def root(request: Request):
+    docs_url = str(request.base_url).rstrip("/") + "/docs"
     # Return a welcome message with API information
     return {
         "message": "Welcome to StockSense API",
         "status": "API is running",
         # Direct users to the auto-generated interactive API documentation (SwaggerUI)
-        "docs": "Visit http://localhost:8000/docs for API documentation"
+        "docs": f"Visit {docs_url} for API documentation"
     }
 
 # Define a health check endpoint (GET request to /health)

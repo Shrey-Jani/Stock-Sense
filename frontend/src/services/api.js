@@ -1,7 +1,12 @@
 import axios from "axios";
 
-// Use environment variable for deployed backend, fallback to localhost for development
-const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
+const PROD_BACKEND_URL = "https://backend-rd0e.onrender.com";
+// Use env var when provided. In production fallback to hosted backend, otherwise localhost.
+const BASE_URL =
+  process.env.REACT_APP_API_URL ||
+  (process.env.NODE_ENV === "production"
+    ? PROD_BACKEND_URL
+    : "http://localhost:8000");
 
 export const fetchPrediction = async (ticker) => {
   const response = await axios.get(`${BASE_URL}/predict`, {
