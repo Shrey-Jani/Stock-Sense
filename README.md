@@ -5,26 +5,26 @@
 
 ---
 
-## Live Demo
-> 🔗 [Live Demo](https://your-vercel-link.vercel.app) &nbsp;|&nbsp; 🐙 [GitHub](https://github.com/YOUR_USERNAME/StockSense)
+## 🔗 Live Demo
 
----
-
-## Screenshots
-
-> *(Add a GIF or screenshot of your dashboard here)*
-> Use ScreenToGif or Loom to record a quick demo and drag it into this section.
+| | Link |
+|---|---|
+| 🌐 Frontend | [frontend-00g7.onrender.com](https://frontend-00g7.onrender.com) |
+| ⚙️ Backend API | [stocksense-backend-20114184210.us-central1.run.app](https://stocksense-backend-20114184210.us-central1.run.app) |
+| 📖 API Docs | [Swagger UI](https://stocksense-backend-20114184210.us-central1.run.app/docs) |
+| 🐙 GitHub | [Shrey-Jani/Stock-Sense](https://github.com/Shrey-Jani/Stock-Sense) |
 
 ---
 
 ## What is StockSense?
 
-StockSense is a full stack AI stock prediction app built from scratch. The user types any stock ticker (like AAPL or TSLA) and gets back:
+StockSense is a full-stack AI stock prediction app built from scratch. The user types any stock ticker (like AAPL or TSLA) and gets back:
 
 - **Tomorrow's prediction** — will the price go UP or DOWN, with a confidence percentage (XGBoost)
 - **30-day price forecast** — actual predicted closing prices shown as a chart overlay (LSTM)
 - **Top movers** — today's biggest gainers and losers
 - **Technical indicators** — RSI, MACD, MA20, MA50 calculated from real market data
+- **Interactive charts** — live price charts with moving averages, and LSTM forecast overlays
 
 ---
 
@@ -32,12 +32,12 @@ StockSense is a full stack AI stock prediction app built from scratch. The user 
 
 | Layer | Technology |
 |---|---|
-| Data | yfinance, pandas, pandas-ta |
-| ML Models | XGBoost, TensorFlow/Keras (LSTM), scikit-learn |
-| Backend | Python, FastAPI, Uvicorn |
-| Database | MongoDB Atlas |
-| Frontend | React 18, Recharts, TailwindCSS |
-| Deployment | Railway (backend), Vercel (frontend) |
+| **Data** | yfinance, pandas |
+| **ML Models** | XGBoost, TensorFlow/Keras (LSTM), scikit-learn |
+| **Backend** | Python 3.11, FastAPI, Uvicorn |
+| **Frontend** | React 19, Recharts, TailwindCSS, Axios |
+| **Deployment** | Google Cloud Run (backend), Render (frontend) |
+| **Containerization** | Docker |
 
 ---
 
@@ -60,7 +60,7 @@ This project intentionally uses Data Structures & Algorithms to optimize real bo
 - **Task:** Predict whether tomorrow's closing price will be higher or lower than today
 - **Output:** Direction (UP/DOWN) + confidence percentage
 - **Features:** MA20, MA50, RSI, MACD, MACD Signal, Volume Change
-- **Accuracy:** ~55-65% (consistently beats 50% random baseline)
+- **Accuracy:** ~55–65% (consistently beats 50% random baseline)
 
 ### LSTM Deep Learning
 - **Task:** Predict actual closing price for the next 30 days
@@ -76,33 +76,40 @@ This project intentionally uses Data Structures & Algorithms to optimize real bo
 StockSense/
 ├── backend/
 │   ├── data/
-│   │   ├── fetcher.py          # yfinance data fetch
+│   │   ├── fetcher.py          # yfinance data fetch with retry logic
 │   │   ├── features.py         # DSA: sliding window indicators
-│   │   ├── cache.py            # DSA: hash map ticker cache
-│   │   └── db.py               # MongoDB read/write
+│   │   └── cache.py            # DSA: hash map ticker cache
 │   ├── models/
 │   │   ├── xgb_model.py        # XGBoost classifier
 │   │   ├── lstm_model.py       # LSTM price predictor
 │   │   └── saved/              # saved .pkl and .h5 model files
 │   ├── api/
 │   │   └── routes/
-│   │       ├── predict.py      # DSA: binary search date range
+│   │       ├── predict.py      # prediction endpoint
 │   │       ├── movers.py       # DSA: min-heap top movers
-│   │       └── history.py      # historical price data
-│   └── main.py                 # FastAPI app entry point
+│   │       ├── history.py      # DSA: binary search date range
+│   │       └── charts.py       # matplotlib chart generation
+│   ├── utils/
+│   │   └── charts.py           # chart rendering helpers
+│   ├── main.py                 # FastAPI app entry point
+│   ├── Dockerfile              # Docker config for Cloud Run
+│   ├── .dockerignore
+│   └── requirements.txt
 │
 ├── frontend/
 │   └── src/
 │       ├── components/
-│       │   ├── SearchBar.jsx
-│       │   ├── PredictionCard.jsx
-│       │   ├── StockChart.jsx
-│       │   ├── TopMovers.jsx
-│       │   └── Indicators.jsx
+│       │   ├── SearchBar.jsx       # ticker search with suggestions
+│       │   ├── PredictionCard.jsx  # prediction results display
+│       │   ├── StockChart.jsx      # historical + forecast chart
+│       │   ├── LiveChart.jsx       # real-time price chart
+│       │   ├── TopMovers.jsx       # top gainers & losers
+│       │   └── Indicators.jsx      # technical indicators display
 │       ├── services/
-│       │   └── api.js          # Axios calls to backend
+│       │   └── api.js              # Axios API client with retry logic
 │       └── App.js
 │
+├── Procfile
 └── README.md
 ```
 
@@ -112,10 +119,12 @@ StockSense/
 
 | Method | Endpoint | Description |
 |---|---|---|
-| GET | `/predict?ticker=AAPL` | Returns direction, confidence, 30-day forecast |
-| GET | `/movers` | Returns top 5 gainers and top 5 losers |
-| GET | `/history?ticker=AAPL&from_date=2024-01-01` | Returns historical prices |
-| GET | `/health` | Health check |
+| `GET` | `/predict?ticker=AAPL` | Returns direction, confidence, 30-day forecast |
+| `GET` | `/movers` | Returns top 5 gainers and top 5 losers |
+| `GET` | `/history?ticker=AAPL&from_date=2024-01-01` | Returns historical prices |
+| `GET` | `/charts?ticker=AAPL` | Returns base64-encoded price/MA and LSTM charts |
+| `GET` | `/health` | Health check |
+| `GET` | `/docs` | Interactive Swagger API documentation |
 
 ---
 
@@ -124,13 +133,12 @@ StockSense/
 ### Prerequisites
 - Python 3.11+
 - Node.js 18+
-- MongoDB Atlas account (free tier)
 
 ### Backend Setup
 
 ```bash
 # Clone the repo
-git clone https://github.com/YOUR_USERNAME/StockSense.git
+git clone https://github.com/Shrey-Jani/Stock-Sense.git
 cd StockSense
 
 # Create virtual environment
@@ -139,13 +147,11 @@ source .venv/bin/activate  # Mac/Linux
 # .venv\Scripts\activate   # Windows
 
 # Install dependencies
-pip install fastapi uvicorn yfinance pandas pandas-ta pymongo scikit-learn xgboost tensorflow joblib python-dotenv
-
-# Create .env file
-echo "MONGO_URI=your_mongodb_connection_string" > backend/.env
+cd backend
+pip install -r requirements.txt
 
 # Run the backend
-uvicorn backend.main:app --reload --port 8000
+uvicorn main:app --reload --port 8000
 ```
 
 ### Frontend Setup
@@ -159,15 +165,39 @@ npm install
 npm start
 ```
 
-### Train the Models
+The app will be available at `http://localhost:3000` with the backend at `http://localhost:8000`.
+
+---
+
+## Deployment
+
+### Backend — Google Cloud Run
+
+The backend is containerized with Docker and deployed to Google Cloud Run with 2GB RAM for ML model training.
 
 ```bash
-# Train XGBoost model for AAPL
-python backend/models/xgb_model.py
+cd backend
 
-# Train LSTM model for AAPL
-python backend/models/lstm_model.py
+gcloud run deploy stocksense-backend \
+  --source . \
+  --region us-central1 \
+  --allow-unauthenticated \
+  --memory 2Gi \
+  --timeout 300 \
+  --max-instances 4 \
+  --concurrency 1 \
+  --set-env-vars "FRONTEND_ORIGIN=https://your-frontend-url.com"
 ```
+
+### Frontend — Render (Static Site)
+
+The React frontend is deployed as a static site on Render with auto-deploy from the `main` branch.
+
+| Render Setting | Value |
+|---|---|
+| Build Command | `cd frontend && npm install && npm run build` |
+| Publish Directory | `frontend/build` |
+| Environment Variable | `REACT_APP_API_URL` = your Cloud Run backend URL |
 
 ---
 
@@ -183,15 +213,17 @@ python backend/models/lstm_model.py
 - How LSTM models use sliding windows to forecast time series data
 - How to apply DSA concepts (heap, binary search, hash map) in real systems to improve performance
 - How to connect a Python ML backend to a React frontend via REST API
+- How to containerize and deploy ML workloads to Google Cloud Run
+- How to handle CORS, rate limiting, and cloud IP blocking in production
 - That debugging `numpy.float32` serialization errors at midnight is a rite of passage
 
 ---
 
 ## Author
 
-**Shrey** — Fresh Graduate | Full Stack + ML  
-🔗 [LinkedIn](https://linkedin.com/in/YOUR_PROFILE) &nbsp;|&nbsp; 🐙 [GitHub](https://github.com/YOUR_USERNAME)
+**Shrey Jani** — Fresh Graduate | Full Stack + ML  
+🔗 [LinkedIn](https://linkedin.com/in/shrey-jani) &nbsp;|&nbsp; 🐙 [GitHub](https://github.com/Shrey-Jani)
 
 ---
 
-*Built with curiosity, a lot of debugging, and way too much coffee.*
+*Built with curiosity, a lot of debugging, and way too much coffee.* ☕
