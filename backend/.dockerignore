@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.env
+.env.local
+.venv/
+.git/
+.gitignore
+*.swp
+*.swo
+.DS_Store
+models/saved/*.pkl
