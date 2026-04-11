@@ -242,10 +242,10 @@ function App() {
               </div>
               <div>
                 <p style={{ fontWeight: 600, fontSize: 15, color: "#1a1a2e" }}>
-                  Running AI models...
+                  AI Models are working...
                 </p>
                 <p style={{ fontSize: 12, color: "#94A3B8", marginTop: 4 }}>
-                  First run may take 2–3 minutes to train
+                  It will take 30 sec - 1 min to predict
                 </p>
               </div>
             </div>
