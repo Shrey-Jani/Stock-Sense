@@ -65,6 +65,7 @@ def train_model(df: pd.DataFrame, ticker: str = "STOCK"):
 
     feature_names = ["MA20", "MA50", "RSI", "MACD", "MACD_Signal", "Volume_Change"]
     impotance_scores = model.feature_importances_
+
     feature_importance = dict(zip(feature_names, impotance_scores))
 
     print("\n Feature Importance (higher = more useful for prediction):")

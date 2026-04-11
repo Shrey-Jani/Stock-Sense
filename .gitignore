@@ -29,3 +29,6 @@ yarn-error.log
 build/
 dist/
 
+# Trained model artifacts
+backend/models/saved/
+

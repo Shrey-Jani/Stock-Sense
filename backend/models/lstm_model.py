@@ -324,3 +324,4 @@ if __name__ == "__main__":
     for i, price in enumerate(result["prices"], 1):
         # :2d formats day number with minimum 2 digits (e.g., " 1", " 2", "10")
         print(f" Days{i:2d}: ${price}")
+
