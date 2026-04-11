@@ -1,4 +1,6 @@
 __pycache__/
+*.pyc
+*.pyo
 *.py[cod]
 .env
 .env.local
@@ -8,4 +10,3 @@ __pycache__/
 *.swp
 *.swo
 .DS_Store
-models/saved/*.pkl

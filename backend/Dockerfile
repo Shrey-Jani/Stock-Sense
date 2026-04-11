@@ -1,30 +1,27 @@
-# Use Python 3.11 slim image to keep the container small
+# Dockerfile
+# This file tells Docker how to package our FastAPI app
+# into a container that can run anywhere — including GCP
+
+# Start with Python 3.11 as the base image
 FROM python:3.11-slim
 
-# Set working directory inside the container
+# Set the working directory inside the container
 WORKDIR /app
 
-# Install system dependencies needed by some Python packages
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc \
-    g++ \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy requirements first (Docker caches this layer if requirements don't change)
+# Copy requirements first — Docker caches this layer
+# so it won't reinstall packages every time you redeploy
 COPY requirements.txt .
 
-# Install Python dependencies
+# Install all Python packages
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the backend code
+# Copy ALL backend files into the container
+# This includes our pre-trained model files in models/saved/
 COPY . .
 
-# Create the saved models directory
-RUN mkdir -p models/saved
+# Tell the container which port to listen on
+EXPOSE 8080
 
-# Cloud Run sets the PORT environment variable
-# Default to 8080 if not set
-ENV PORT=8080
-
-# Run the FastAPI app with uvicorn
-CMD uvicorn main:app --host 0.0.0.0 --port $PORT
+# Command to start the FastAPI server
+# GCP Cloud Run uses port 8080 by default
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]

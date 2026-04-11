@@ -43,19 +43,15 @@ allowed_origins = [
 ]
 
 app.add_middleware(
-    # Use CORSMiddleware to handle CORS
     CORSMiddleware,
-    # Allow requests from localhost (development) and Vercel (production)
-    # Without this, the browser would block requests due to same-origin policy
-    allow_origins = allowed_origins,
-    # Allow credentials (cookies, authorization headers) in cross-origin requests
-    allow_credentials = True,
-    # Allow all HTTP methods: GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD, TRACE
-    allow_methods = ["*"],
-    # Allow all HTTP headers in requests (Content-Type, Authorization, etc.)
-    allow_headers = ["*"],
-    # Allow Vercel preview domains without listing each one manually
-    allow_origin_regex=r"https://.*\.vercel\.app"
+    allow_origins=[
+        "http://localhost:3000",           # local development
+        "https://your-app.vercel.app",     # replace with your Vercel URL after deploying frontend
+        "*"                                # allows all origins (remove after testing)
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
