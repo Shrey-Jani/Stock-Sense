@@ -1,7 +1,7 @@
 // SearchBar.jsx — modern floating search bar
 
-import React, { useState } from "react";
-import { fetchPrediction } from "../services/api";
+import React, { useEffect, useState } from "react";
+import { fetchAvailableTickers, fetchPrediction } from "../services/api";
 
 const SUGGESTIONS = [
   "AAPL",
@@ -64,6 +64,22 @@ const COMPANY_TO_TICKER = {
 function SearchBar({ onDataFetched, onError, setLoading }) {
   const [ticker, setTicker] = useState("");
   const [focused, setFocused] = useState(false);
+  const [suggestions, setSuggestions] = useState(SUGGESTIONS);
+
+  useEffect(() => {
+    const loadSuggestions = async () => {
+      try {
+        const data = await fetchAvailableTickers();
+        if (Array.isArray(data?.tickers) && data.tickers.length > 0) {
+          setSuggestions(data.tickers.slice(0, 8));
+        }
+      } catch (_error) {
+        // Keep static fallback suggestions if API is unavailable.
+      }
+    };
+
+    loadSuggestions();
+  }, []);
 
   // Convert company name to ticker symbol
   const nameToTicker = (input) => {
@@ -222,21 +238,12 @@ function SearchBar({ onDataFetched, onError, setLoading }) {
         >
           Try:
         </span>
-        {[
-          "Apple",
-          "Tesla",
-          "Google",
-          "Microsoft",
-          "Amazon",
-          "Nvidia",
-          "Meta",
-          "Netflix",
-        ].map((company) => (
+        {suggestions.map((symbol) => (
           <button
-            key={company}
+            key={symbol}
             onClick={() => {
-              setTicker(company);
-              handleSearch(company);
+              setTicker(symbol);
+              handleSearch(symbol);
             }}
             style={{
               background: "#F8F7F4",
@@ -261,7 +268,7 @@ function SearchBar({ onDataFetched, onError, setLoading }) {
               e.target.style.borderColor = "rgba(0,0,0,0.08)";
             }}
           >
-            {company}
+            {symbol}
           </button>
         ))}
       </div>

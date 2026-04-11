@@ -36,6 +36,11 @@ export const fetchPrediction = async (ticker) => {
   return response.data;
 };
 
+export const fetchAvailableTickers = async () => {
+  const response = await api.get(`/predict/available-tickers`);
+  return response.data;
+};
+
 export const fetchMovers = async () => {
   const response = await api.get(`/movers/`);
   return response.data;
